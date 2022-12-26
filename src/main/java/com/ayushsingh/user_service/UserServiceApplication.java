@@ -20,4 +20,13 @@ public class UserServiceApplication {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
+
+	// //Main class is a confifuration class
+	// //The Spring container should have a bean of RestTemplate
+	// //to autowire it
+	// @Bean
+	// public RestTemplate restTemplate(){
+	// 	return new RestTemplate();
+	// }
+	//OR CREATE A SEPARATE CONFIG CLASS 
 }
