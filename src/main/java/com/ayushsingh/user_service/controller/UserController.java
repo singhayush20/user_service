@@ -41,21 +41,21 @@ public class UserController {
         return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
-    @GetMapping(value="/all-users")
+    @GetMapping(value="/get-all-users")
     public ResponseEntity<?> getAllUsers(){
         List<UserDto> userDtos=this.userServiceImpl.getAllUsers();
         SuccessResponse<List<UserDto>> successResponse=new SuccessResponse<>(AppConstants.SUCCESS_CODE,AppConstants.SUCCESS_MESSAGE,userDtos);
         return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
-    @GetMapping(value="get-user-by-id")
+    @GetMapping(value="/get-user-by-id")
     public ResponseEntity<?> getUserById(@RequestParam(name="userId") String userId){
         UserDto  userDto=this.userServiceImpl.getUser(userId);
         SuccessResponse<UserDto> successResponse=new SuccessResponse<>(AppConstants.SUCCESS_CODE,AppConstants.SUCCESS_MESSAGE,userDto);
         return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
-    @PutMapping(value="update-user")
+    @PutMapping(value="/update-user")
     public ResponseEntity<?> updateUser(@RequestBody UserDto userDto) {
         UserDto uDto=this.userServiceImpl.updateUser(userDto);
         SuccessResponse<UserDto> successResponse=new SuccessResponse<>(AppConstants.SUCCESS_CODE, AppConstants.SUCCESS_MESSAGE, uDto);

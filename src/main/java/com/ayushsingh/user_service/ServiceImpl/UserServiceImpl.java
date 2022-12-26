@@ -2,6 +2,7 @@ package com.ayushsingh.user_service.ServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto saveUser(UserDto userDto) {
-        User user = this.userRepository.findById(userDto.getUserId()).get();
-        if (user != null) {
-            throw new DuplicateResourceException("User", "user id", userDto.getUserId());
-        } else {
-            user = this.userRepository.save(this.dtoToUser(userDto));
-        }
+        userDto.setUserId(UUID.randomUUID().toString());
+           User user = this.userRepository.save(this.dtoToUser(userDto));
         return this.userToDto(user);
     }
 
@@ -69,9 +66,9 @@ public class UserServiceImpl implements UserService {
         User user = this.userRepository.findById(userDto.getUserId()).get();
         if (user != null) {
             user.setAbout(userDto.getAbout());
-            user.setEmail(user.getEmail());
-            user.setName(user.getName());
-            user.setPhoneNo(user.getPhoneNo());
+            user.setEmail(userDto.getEmail());
+            user.setName(userDto.getName());
+            user.setPhoneNo(userDto.getPhoneNo());
             user = this.userRepository.save(user);
         } else {
             throw new ResourceNotFoundException("User", "user id", userDto.getUserId());
