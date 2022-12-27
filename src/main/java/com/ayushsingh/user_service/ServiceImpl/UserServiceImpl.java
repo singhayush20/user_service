@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,6 +19,7 @@ import com.ayushsingh.user_service.entities.Hotel;
 import com.ayushsingh.user_service.entities.Rating;
 import com.ayushsingh.user_service.entities.User;
 import com.ayushsingh.user_service.exceptions.ResourceNotFoundException;
+import com.ayushsingh.user_service.exceptions.SuccessResponse;
 import com.ayushsingh.user_service.external.services.HotelService;
 import com.ayushsingh.user_service.external.services.RatingService;
 import com.ayushsingh.user_service.repositories.UserRepository;
@@ -26,9 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final String FETCH_HOTELS_URL = "http://HOTEL-SERVICE/microservices/hotel/get-hotel-by-id?hotelId=";
-
-    private static final String FETCH_RATINGS_URL = "http://RATING-SERVICE/microservices/rating/get-all-ratings-by-user?userId=";
+  
 
     @Autowired
     UserRepository userRepository;
@@ -94,10 +94,10 @@ public class UserServiceImpl implements UserService {
         Map<?,?> ratingsResponse=ratingService.getRatings(userId);
 
         
-        if (ratingsResponse != null && ratingsResponse.isEmpty() == false) {
+        if (ratingsResponse != null && ratingsResponse.isEmpty() == false&&ratingsResponse.containsKey("data")) {
             // get the list of ratings map
             List<Map<?, ?>> ratingsResult = (List<Map<?, ?>>) ratingsResponse.get("data");
-
+            
             // convert to list of Rating objects
             List<Rating> ratings = new ArrayList<>();
             for (Map<?, ?> rating : ratingsResult) {
@@ -112,10 +112,12 @@ public class UserServiceImpl implements UserService {
                 //         Map.class).getBody();
 
                 //METHOD-2 USING FEIGN CLIENT
-                Map<?,?> hotelResult=hotelService.getHotel(rating.getHotelId());
+                // Map<?,?> hotelResult=hotelService.getHotel(rating.getHotelId());
 
+                ResponseEntity<SuccessResponse<Hotel>> hotelResult=hotelService.getHotel(rating.getHotelId());
                 if (hotelResult != null) {
-                    Hotel hotel = mapper.convertValue(hotelResult.get("data"), Hotel.class);
+                    // Hotel hotel = mapper.convertValue(hotelResult.get("data"), Hotel.class);
+                    Hotel hotel=hotelResult.getBody().getData();
                     logger.info("fetched hotel: ",hotel);
                     rating.setHotel(hotel);
                 }

@@ -23,6 +23,10 @@ public class AppConstants {
     public static final String BEARER="Bearer";
     public static final String ADMIN_KEY="adminkey";
 
+    //URLs
+    public static final String FETCH_HOTELS_URL = "http://HOTEL-SERVICE/microservices/hotel/get-hotel-by-id?hotelId=";
+
+    public static final String FETCH_RATINGS_URL = "http://RATING-SERVICE/microservices/rating/get-all-ratings-by-user?userId=";
     
 
 }
