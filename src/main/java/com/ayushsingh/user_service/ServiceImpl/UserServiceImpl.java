@@ -18,11 +18,17 @@ import com.ayushsingh.user_service.entities.Hotel;
 import com.ayushsingh.user_service.entities.Rating;
 import com.ayushsingh.user_service.entities.User;
 import com.ayushsingh.user_service.exceptions.ResourceNotFoundException;
+import com.ayushsingh.user_service.external.services.HotelService;
+import com.ayushsingh.user_service.external.services.RatingService;
 import com.ayushsingh.user_service.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final String FETCH_HOTELS_URL = "http://HOTEL-SERVICE/microservices/hotel/get-hotel-by-id?hotelId=";
+
+    private static final String FETCH_RATINGS_URL = "http://RATING-SERVICE/microservices/rating/get-all-ratings-by-user?userId=";
 
     @Autowired
     UserRepository userRepository;
@@ -32,6 +38,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private HotelService hotelService;
+
+    @Autowired
+    private RatingService ratingService;
 
     final private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     final ObjectMapper mapper = new ObjectMapper();
@@ -73,11 +85,15 @@ public class UserServiceImpl implements UserService {
         // we can use RestTemplate
 
         // fetch the ratings response
-        Map<?, ?> ratingsResponse = restTemplate
-                .getForEntity("http://localhost:8083/microservices/rating/get-all-ratings-by-user?userId=" + userId,
-                        Map.class)
-                .getBody();
 
+        //====METHOD-1 USING REST TEMPLATE
+        // Map<?, ?> ratingsResponse = restTemplate
+        //         .getForEntity(FETCH_RATINGS_URL + userId,
+        //                 Map.class)
+        //         .getBody();
+        Map<?,?> ratingsResponse=ratingService.getRatings(userId);
+
+        
         if (ratingsResponse != null && ratingsResponse.isEmpty() == false) {
             // get the list of ratings map
             List<Map<?, ?>> ratingsResult = (List<Map<?, ?>>) ratingsResponse.get("data");
@@ -90,13 +106,17 @@ public class UserServiceImpl implements UserService {
             }
             // for each rating also fetch the hotel
             ratings.forEach((rating) -> {
+                //METHOD-1 USING REST TEMPLATE
+                // Map<?, ?> hotelResult = (Map<?, ?>) restTemplate.getForEntity(
+                //         FETCH_HOTELS_URL + rating.getHotelId(),
+                //         Map.class).getBody();
 
-                Map<?, ?> hotelResult = (Map<?, ?>) restTemplate.getForEntity(
-                        "http://localhost:8086/microservices/hotel/get-hotel-by-id?hotelId=" + rating.getHotelId(),
-                        Map.class).getBody();
+                //METHOD-2 USING FEIGN CLIENT
+                Map<?,?> hotelResult=hotelService.getHotel(rating.getHotelId());
+
                 if (hotelResult != null) {
                     Hotel hotel = mapper.convertValue(hotelResult.get("data"), Hotel.class);
-                    logger.info("fetched hotel: ", hotel);
+                    logger.info("fetched hotel: ",hotel);
                     rating.setHotel(hotel);
                 }
             });
