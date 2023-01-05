@@ -3,11 +3,12 @@ server:
 
     
 spring:
+    application:
+        name: USER-SERVICE #changes the name of application from UNKNOWN to UserService
     datasource:
         url: jdbc:mysql://localhost:3306/microservices
         username: hbstudent
         password: hbstudent
-        # driver-class-name: com.mysql.jdbc.Driver
     jpa:
         hibernate:
             ddl-auto: update
@@ -15,14 +16,50 @@ spring:
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.MySQL8Dialect
-    application:
-        name: USER-SERVICE #changes the name of application from UNKNOWN to UserService
+    config:
+        import: optional:configserver:http://localhost:8089   
+    profiles:
+        active: prod #to use the production profile OR dev; profile can also be changed while running JAR
+#Actuator configuration
+management:
+    health:
+        circuitbreakers:
+            enabled: true
+    endpoints:
+        web:
+            exposure:
+                include: health
+    endpoint:
+        health:
+            show-details: always
 
-eureka:
-    instance:
-        prefer-ip-address: true
-    client:
-        fetch-registry: true #true by default
-        register-with-eureka: true #true by default
-        service-url:
-            defaultZone: http://localhost:8761/eureka #url of the eureka server, registers with this url
+#Resilience4 configuration
+
+resilience4j:
+    circuitbreaker:
+        instances:
+            RATINGHOTELCIRCUITBREAKER:
+                registerHealthIndicator: true
+                eventConsumerBufferSize: 10
+                failureRateThreshold: 50 #in percent, if more than this it will get triggered
+                minimumNumberOfCalls: 5
+                automaticTransitionFromOpenToHalfOpenEnabled: true
+                waitDurationInOpenState: 5 #in second, wait for 5s in open state than go to half open
+                permittedNumberOfCallsInHalfOpenState: 3 #when in half open state check the success and failure percentage after 3 calls and move to open or closed accordingly
+                slidingWindowSize: 10
+                slidingWindowType: COUNT_BASED
+    retry:
+        instances:
+            RATINGHOTELRETRY:
+                max-attempts: 3
+                wait-duration: 5s
+
+#This common configuration is not required when using config server
+# eureka:
+#     instance:
+#         prefer-ip-address: true
+#     client:
+#         fetch-registry: true #true by default
+#         register-with-eureka: true #true by default
+#         service-url:
+#             defaultZone: http://localhost:8761/eureka #url of the eureka server, registers with this url
