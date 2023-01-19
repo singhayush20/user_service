@@ -15,6 +15,7 @@ import com.ayushsingh.user_service.dto.UserDto;
 import com.ayushsingh.user_service.exceptions.SuccessResponse;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -57,7 +58,8 @@ public class UserController {
     // this api is using the other two services- hotel and rating service
     // therefore we implement the circuit breaker
     // @CircuitBreaker(name = "RATINGHOTELCIRCUITBREAKER", fallbackMethod = "ratingHotelFallback")
-    @Retry(name="RATINGHOTELRETRY",fallbackMethod = "ratingHotelFallback") //using same method for understanding
+    // @Retry(name="RATINGHOTELRETRY",fallbackMethod = "ratingHotelFallback") //using same method for understanding
+    @RateLimiter(name="USERRATELIMITER",fallbackMethod = "ratingHotelFallback")
     @GetMapping(value = "/get-user-by-id")
     public ResponseEntity<?> getUserById(@RequestParam(name = "userId") String userId) {
         System.out.println("Retry count: "+retryCount++);

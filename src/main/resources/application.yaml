@@ -20,6 +20,27 @@ spring:
         import: optional:configserver:http://localhost:8089   
     profiles:
         active: prod #to use the production profile OR dev; profile can also be changed while running JAR
+    #spring security configuration is required in user-service because it
+    #also works as a client when requesting data from other services
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: https://dev-90272233.okta.com/oauth2/default
+            client:
+                registration:
+                #can keep any name here
+                    my-internal-client:
+                        provider: okta
+                        authorization-grant-type: client_credentials #require client-credentials for authentication
+                        scope: internal #using internal scope because we want to use APIs internally
+                        client-id: 0oa7zgjoegXjkLqhK5d7
+                        client-secret: _Zoj85x4vu2kRywuFk9XxtzlxkIB9FLqP4hGRGS0
+                provider:
+                    okta: 
+                        issuer-uri: https://dev-90272233.okta.com/oauth2/default
+
+
 #Actuator configuration
 management:
     health:
@@ -48,11 +69,27 @@ resilience4j:
                 permittedNumberOfCallsInHalfOpenState: 3 #when in half open state check the success and failure percentage after 3 calls and move to open or closed accordingly
                 slidingWindowSize: 10
                 slidingWindowType: COUNT_BASED
+    # Retry
     retry:
         instances:
             RATINGHOTELRETRY:
                 max-attempts: 3
                 wait-duration: 5s
+    # Rate Limiter
+    ratelimiter:
+        instances:
+            USERRATELIMITER:
+                limit-refresh-period: 4s
+                limit-for-period: 2 #number of requests for limit referesh period
+                timeout-duration: 0s
+
+#okta oauth configuration
+okta:
+    oauth2:
+        issuer: https://dev-90272233.okta.com/oauth2/default
+        audience: api://default
+
+
 
 #This common configuration is not required when using config server
 # eureka:

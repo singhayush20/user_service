@@ -113,7 +113,21 @@
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-spring-boot2</artifactId>
 		</dependency>
-
+		<!-- Spring Okta Security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		  </dependency>
+		  <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		  </dependency>
+		  <dependency>
+			<groupId>com.okta.spring</groupId> 
+			<artifactId>okta-spring-boot-starter</artifactId>
+			<version>2.1.6</version>
+		  </dependency>
+		  <!-- These three dependencies are required for OAuth Security -->
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
